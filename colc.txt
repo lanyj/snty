@@ -1,0 +1,8 @@
+# Using tool @ https://github.com/lanyj/TextLineCollector
+
+.settings/
+target/
+
+**.log
+**.cfg
+**.properties
