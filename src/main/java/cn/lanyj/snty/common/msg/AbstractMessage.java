@@ -72,11 +72,15 @@ public abstract class AbstractMessage<T extends Serializable> implements Message
 			} else {
 				ret &= op.id().equals(this.id());
 			}
+			if (!ret)
+				return false;
 			if (op.content() == null || this.content() == null) {
 				ret &= op.content() == this.content();
 			} else {
 				ret &= op.content().equals(this.content());
 			}
+			if (!ret)
+				return false;
 			if (op.status() == null || this.status() == null) {
 				ret &= op.status() == this.status();
 			} else {
