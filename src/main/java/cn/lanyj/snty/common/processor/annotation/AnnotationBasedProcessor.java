@@ -10,7 +10,6 @@ import cn.lanyj.snty.common.processor.Processor;
 import cn.lanyj.snty.common.processor.ProcessorContext;
 import cn.lanyj.snty.common.processor.ProcessorContext.State;
 import cn.lanyj.snty.common.processor.exception.DuplicateProcessorException;
-import cn.lanyj.snty.common.processor.exception.NotFoundProcessorException;
 import cn.lanyj.snty.common.processor.exception.ProcessException;
 import cn.lanyj.snty.common.utils.ReflectUtils;
 
@@ -31,29 +30,41 @@ public class AnnotationBasedProcessor implements Processor {
 	@Override
 	public <T extends Serializable> boolean handleMessage(ProcessorContext context, Message<T> msg)
 			throws ProcessException {
-		try {
-			return (boolean) getMessageProcessors(msg.getClass()).method.invoke(bean, context, msg);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new ProcessException("Handle message failed", e);
+		MethodProcessor processor = getMessageProcessor(msg.getClass());
+		if (processor != null) {
+			try {
+				return (boolean) processor.method.invoke(bean, context, msg);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new ProcessException("Handle message failed", e);
+			}
 		}
+		return false;
 	}
 
 	@Override
 	public boolean handleEvent(ProcessorContext context, Object event) throws ProcessException {
-		try {
-			return (boolean) getEventProcessors(event.getClass()).method.invoke(bean, context, event);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new ProcessException("Handle event failed", e);
+		MethodProcessor processor = getEventProcessor(event.getClass());
+		if (processor != null) {
+			try {
+				return (boolean) processor.method.invoke(bean, context, event);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new ProcessException("Handle event failed", e);
+			}
 		}
+		return false;
 	}
 
 	@Override
 	public boolean handleException(ProcessorContext context, Throwable t) throws ProcessException {
-		try {
-			return (boolean) getExceptionProcessors(t.getClass()).method.invoke(bean, context, t);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new ProcessException("Handle exception failed", e);
+		MethodProcessor processor = getExceptionProcessor(t.getClass());
+		if (processor != null) {
+			try {
+				return (boolean) processor.method.invoke(bean, context, t);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new ProcessException("Handle exception failed", e);
+			}
 		}
+		return false;
 	}
 
 	@Override
@@ -70,7 +81,7 @@ public class AnnotationBasedProcessor implements Processor {
 		return false;
 	}
 
-	public MethodProcessor getMessageProcessors(Class<?> clazz) {
+	public MethodProcessor getMessageProcessor(Class<?> clazz) {
 		MethodProcessor processor = messageProcessors.get(clazz);
 		if (processor == null) {
 			for (MethodProcessor mp : context.getMessageProcessors()) {
@@ -90,14 +101,15 @@ public class AnnotationBasedProcessor implements Processor {
 					}
 				}
 			}
-			if (processor == null)
-				throw new NotFoundProcessorException("Processor not found for message type: " + clazz);
+//			if (processor == null) {
+//				throw new NotFoundProcessorException("Processor not found for message type: " + clazz);
+//			}
 			messageProcessors.put(clazz, processor);
 		}
 		return processor;
 	}
 
-	public MethodProcessor getEventProcessors(Class<?> clazz) {
+	public MethodProcessor getEventProcessor(Class<?> clazz) {
 		MethodProcessor processor = eventProcessors.get(clazz);
 		if (processor == null) {
 			for (MethodProcessor mp : context.getEventProcessors()) {
@@ -117,14 +129,15 @@ public class AnnotationBasedProcessor implements Processor {
 					}
 				}
 			}
-			if (processor == null)
-				throw new NotFoundProcessorException("Processor not found for event type: " + clazz);
+//			if (processor == null) {
+//				throw new NotFoundProcessorException("Processor not found for event type: " + clazz);
+//			}
 			eventProcessors.put(clazz, processor);
 		}
 		return processor;
 	}
 
-	public MethodProcessor getExceptionProcessors(Class<?> clazz) {
+	public MethodProcessor getExceptionProcessor(Class<?> clazz) {
 		MethodProcessor processor = exceptionProcessors.get(clazz);
 		if (processor == null) {
 			for (MethodProcessor mp : context.getExceptionProcessors()) {
@@ -144,8 +157,9 @@ public class AnnotationBasedProcessor implements Processor {
 					}
 				}
 			}
-			if (processor == null)
-				throw new NotFoundProcessorException("Processor not found for exception type: " + clazz);
+//			if (processor == null) {
+//				throw new NotFoundProcessorException("Processor not found for exception type: " + clazz);
+//			}
 			exceptionProcessors.put(clazz, processor);
 		}
 		return processor;
