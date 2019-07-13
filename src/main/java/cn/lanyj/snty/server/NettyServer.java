@@ -32,12 +32,12 @@ public abstract class NettyServer {
 
 	protected final GlobalConfig config = GlobalConfig.getInstance();
 
-	NettyLifeCycleManager nettyLifeCycleManager = new NettyLifeCycleManager();
+	protected NettyLifeCycleManager nettyLifeCycleManager = new NettyLifeCycleManager();
 
-	EventLoopGroup bossGroup;
-	EventLoopGroup workGroup;
-	ServerBootstrap bootstrap;
-	Channel channel;
+	protected EventLoopGroup bossGroup;
+	protected EventLoopGroup workGroup;
+	protected ServerBootstrap bootstrap;
+	protected Channel channel;
 
 	public NettyServer() {
 		init();

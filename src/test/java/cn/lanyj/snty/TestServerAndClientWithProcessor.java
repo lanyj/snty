@@ -17,6 +17,7 @@ import cn.lanyj.snty.common.processor.exception.ProcessException;
 import cn.lanyj.snty.common.processor.handler.ProcessorHandler;
 import cn.lanyj.snty.common.processor.impl.DefaultProcessorManager;
 import cn.lanyj.snty.common.session.Session;
+import cn.lanyj.snty.common.utils.IdUtils;
 import cn.lanyj.snty.common.utils.SessionUtils;
 import cn.lanyj.snty.common.utils.UncaughtExceptionUtil;
 import cn.lanyj.snty.helper.DoubleMessage;
@@ -55,22 +56,22 @@ public class TestServerAndClientWithProcessor {
 									Session session = SessionUtils.getSessionFromChannel(ctx.channel());
 
 									IntMessage message = (IntMessage) msg;
-									message.setContent(message.content + 1);
+									message.setContent(message.content() + 1);
 									ctx.writeAndFlush(message);
 
 									if (Math.random() < 0.2f) {
-										StrMessage s = new StrMessage();
+										StrMessage s = new StrMessage(IdUtils.nextUUIDAsString());
 										s.setContent(UUID.randomUUID().toString());
 										ctx.writeAndFlush(s);
 									}
 
 									if (Math.random() < 0.2f) {
-										DoubleMessage s = new DoubleMessage();
+										DoubleMessage s = new DoubleMessage(IdUtils.nextUUIDAsString());
 										s.setContent(Math.random() * 1000);
 										ctx.writeAndFlush(s);
 									}
 
-									session.set("content", message.content);
+									session.set("content", message.content());
 								}
 							}
 
@@ -106,7 +107,7 @@ public class TestServerAndClientWithProcessor {
 								public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 									if (msg instanceof IntMessage) {
 										IntMessage message = (IntMessage) msg;
-										message.setContent(message.content + 1);
+										message.setContent(message.content() + 1);
 										ctx.writeAndFlush(message);
 									}
 
@@ -124,7 +125,7 @@ public class TestServerAndClientWithProcessor {
 						client.connect(InetAddress.getByName("localhost"), 8080);
 
 						Thread.sleep(1000);
-						IntMessage message = new IntMessage();
+						IntMessage message = new IntMessage(IdUtils.nextUUIDAsString());
 						ChannelFuture future = client.getChannel().writeAndFlush(message);
 						future.addListener(new ChannelFutureListener() {
 

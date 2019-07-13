@@ -4,14 +4,14 @@ import java.io.Serializable;
 
 public interface Message<T extends Serializable> extends Serializable {
 
-	String id();
+	<F extends Serializable> F id();
 
 	T content();
 
 	MessageStatus status();
 
-	void setContent(T content);
+	<F extends Message<T>> F setContent(T content);
 
-	void setStatus(MessageStatus status);
+	<F extends Message<T>> F setStatus(MessageStatus status);
 
 }

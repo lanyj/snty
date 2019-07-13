@@ -1,5 +1,7 @@
 package cn.lanyj.snty.common.config;
 
+import cn.lanyj.snty.common.config.config.Config;
+import cn.lanyj.snty.common.config.config.DefaultConfig;
 import io.netty.handler.logging.LogLevel;
 
 public class GlobalConfig {
@@ -9,6 +11,8 @@ public class GlobalConfig {
 	public final LoggingConfig loggingConfig;
 	public final SessionConfig sessionConfig;
 	public final JedisConfig jedisConfig;
+	
+	public final Config commonConfig = new DefaultConfig();
 
 	private GlobalConfig() {
 		this.frameBasedConfig = new FrameBasedConfig();

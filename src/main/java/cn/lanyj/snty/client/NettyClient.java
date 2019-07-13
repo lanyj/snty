@@ -31,11 +31,11 @@ public abstract class NettyClient {
 
 	protected GlobalConfig config = GlobalConfig.getInstance();
 
-	NettyLifeCycleManager nettyLifeCycleManager = new NettyLifeCycleManager();
+	protected NettyLifeCycleManager nettyLifeCycleManager = new NettyLifeCycleManager();
 
-	EventLoopGroup group;
-	Bootstrap bootstrap;
-	Channel channel;
+	protected EventLoopGroup group;
+	protected Bootstrap bootstrap;
+	protected Channel channel;
 
 	public NettyClient() {
 		init();
@@ -128,6 +128,18 @@ public abstract class NettyClient {
 
 	public Channel getChannel() {
 		return this.channel;
+	}
+
+	public ChannelFuture write(Object msg) {
+		return getChannel().write(msg);
+	}
+
+	public Channel flush() {
+		return getChannel().flush();
+	}
+
+	public ChannelFuture writeAndFlush(Object msg) {
+		return getChannel().writeAndFlush(msg);
 	}
 
 	public NettyLifeCycleManager getNettyLifeCycleManager() {

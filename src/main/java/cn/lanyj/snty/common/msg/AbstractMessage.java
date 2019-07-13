@@ -5,29 +5,30 @@ import java.io.Serializable;
 public abstract class AbstractMessage<T extends Serializable> implements Message<T> {
 	private static final long serialVersionUID = 6379447820078004922L;
 
-	private String id = null;
+	private Serializable id = null;
 	private T content = null;
 	private MessageStatus status;
 
-	public AbstractMessage(String id) {
+	public AbstractMessage(Serializable id) {
 		this.id = id;
 	}
 
-	public AbstractMessage(String id, T content) {
+	public AbstractMessage(Serializable id, T content) {
 		this.id = id;
 		this.content = content;
 		this.status = MessageStatus.SUCCESS;
 	}
 
-	public AbstractMessage(String id, T content, MessageStatus status) {
+	public AbstractMessage(Serializable id, T content, MessageStatus status) {
 		this.id = id;
 		this.content = content;
 		this.status = status;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public String id() {
-		return id;
+	public <F extends Serializable> F id() {
+		return (F) id;
 	}
 
 	@Override
@@ -40,14 +41,18 @@ public abstract class AbstractMessage<T extends Serializable> implements Message
 		return status;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setContent(T content) {
+	public <F extends Message<T>> F setContent(T content) {
 		this.content = content;
+		return (F) this;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setStatus(MessageStatus status) {
+	public <F extends Message<T>> F setStatus(MessageStatus status) {
 		this.status = status;
+		return (F) this;
 	}
 
 	@Override
@@ -94,6 +99,16 @@ public abstract class AbstractMessage<T extends Serializable> implements Message
 
 	@Override
 	public String toString() {
-		return "[" + id() + ", " + status() + ", " + content() + "]";
+		StringBuffer buffer = new StringBuffer(32);
+		buffer.append('{');
+		buffer.append(this.getClass().getSimpleName());
+		buffer.append(": [");
+		buffer.append((Serializable) id());
+		buffer.append(", ");
+		buffer.append(status());
+		buffer.append(", ");
+		buffer.append(content());
+		buffer.append("]}");
+		return buffer.toString();
 	}
 }

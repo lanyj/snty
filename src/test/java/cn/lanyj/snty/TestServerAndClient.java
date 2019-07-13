@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import cn.lanyj.snty.client.NettyClient;
 import cn.lanyj.snty.common.config.GlobalConfig;
 import cn.lanyj.snty.common.session.Session;
+import cn.lanyj.snty.common.utils.IdUtils;
 import cn.lanyj.snty.common.utils.SessionUtils;
 import cn.lanyj.snty.common.utils.UncaughtExceptionUtil;
 import cn.lanyj.snty.helper.IntMessage;
@@ -42,10 +43,10 @@ public class TestServerAndClient {
 								System.out.println(session.getOrDefault("content", -1));
 
 								IntMessage message = (IntMessage) msg;
-								message.setContent(message.content + 1);
+								message.setContent(message.content() + 1);
 								ctx.writeAndFlush(message);
 
-								session.set("content", message.content);
+								session.set("content", message.content());
 							}
 
 						});
@@ -81,7 +82,7 @@ public class TestServerAndClient {
 									super.channelRead(ctx, msg);
 
 									IntMessage message = (IntMessage) msg;
-									message.setContent(message.content + 1);
+									message.setContent(message.content() + 1);
 									ctx.writeAndFlush(message);
 								}
 							});
@@ -91,7 +92,7 @@ public class TestServerAndClient {
 						client.connect(InetAddress.getByName("localhost"), 8080);
 
 						Thread.sleep(1000);
-						IntMessage message = new IntMessage();
+						IntMessage message = new IntMessage(IdUtils.nextUUIDAsString());
 						ChannelFuture future = client.getChannel().writeAndFlush(message);
 						future.addListener(new ChannelFutureListener() {
 

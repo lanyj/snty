@@ -9,6 +9,13 @@ import cn.lanyj.snty.common.utils.SessionUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
+/**
+ * processor context, holds native netty {@link ChannelHandlerContext} and
+ * {@link ProcessorManager}, and used for trigger event method
+ * 
+ * @author lanyj
+ *
+ */
 public interface ProcessorContext {
 
 	public static enum State {
@@ -17,13 +24,15 @@ public interface ProcessorContext {
 
 	ChannelHandlerContext getChannelHandlerContext();
 
-	ProcessorManager processorManager();
+	ProcessorManager getProcessorManager();
 
-	void handleEvent(Object event) throws ProcessException;
+	void setProcessorManager(ProcessorManager manager);
 
-	void handleException(Throwable t) throws ProcessException;
+	boolean handleEvent(Object event) throws ProcessException;
 
-	void handleChannelStateChanged(State state) throws ProcessException;
+	boolean handleException(Throwable t) throws ProcessException;
+
+	boolean handleChannelStateChanged(State state) throws ProcessException;
 
 	default Session getContextSession() {
 		return SessionUtils.getSessionFromChannel(getChannelHandlerContext().channel());
@@ -33,8 +42,7 @@ public interface ProcessorContext {
 		return getChannelHandlerContext().writeAndFlush(msg);
 	}
 
-	default <T extends Serializable> void handleMessage(Message<T> msg)
-			throws ProcessException {
-		processorManager().handleMessage(this, msg);
+	default <T extends Serializable> boolean handleMessage(Message<T> msg) throws ProcessException {
+		return getProcessorManager().handleMessage(this, msg);
 	}
 }

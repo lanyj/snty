@@ -25,11 +25,12 @@ public class DefaultProcessorManager implements ProcessorManager {
 		this.defaultProcessor.processor = DEFAULT_PROCESSOR;
 	}
 
+	/**
+	 * Non thread safe
+	 */
 	@Override
 	public void setDefaultProcessor(Processor processor) {
-		synchronized (defaultProcessor) {
-			this.defaultProcessor.processor = processor;
-		}
+		this.defaultProcessor.processor = processor;
 	}
 
 	@Override
@@ -145,64 +146,69 @@ public class DefaultProcessorManager implements ProcessorManager {
 	}
 
 	@Override
-	public void handleChannelStateChanged(ProcessorContext context, State pre, State cur) throws ProcessException {
+	public boolean handleChannelStateChanged(ProcessorContext context, State pre, State cur) throws ProcessException {
 		synchronized (warpers) {
 			for (int i = 0; i < index; i++) {
 				ProcessorWarper warper = warpers[i];
 				if (warper.processor.handleChannelStateChanged(context, pre, cur)) {
-					return;
+					return true;
 				}
 			}
 		}
-		synchronized (defaultProcessor) {
-			defaultProcessor.processor.handleChannelStateChanged(context, pre, cur);
+		if (defaultProcessor.processor != null
+				&& defaultProcessor.processor.handleChannelStateChanged(context, pre, cur)) {
+			return true;
 		}
+		return false;
 	}
 
 	@Override
-	public <T extends Serializable> void handleMessage(ProcessorContext context, Message<T> msg)
+	public <T extends Serializable> boolean handleMessage(ProcessorContext context, Message<T> msg)
 			throws ProcessException {
 		synchronized (warpers) {
 			for (int i = 0; i < index; i++) {
 				ProcessorWarper warper = warpers[i];
 				if (warper.processor.handleMessage(context, msg)) {
-					return;
+					return true;
 				}
 			}
 		}
-		synchronized (defaultProcessor) {
-			defaultProcessor.processor.handleMessage(context, msg);
+		if (defaultProcessor.processor != null && defaultProcessor.processor.handleMessage(context, msg)) {
+			return true;
 		}
+		return false;
 	}
 
 	@Override
-	public void handleEvent(ProcessorContext context, Object event) throws ProcessException {
+	public boolean handleEvent(ProcessorContext context, Object event) throws ProcessException {
 		synchronized (warpers) {
 			for (int i = 0; i < index; i++) {
 				ProcessorWarper warper = warpers[i];
 				if (warper.processor.handleEvent(context, event)) {
-					return;
+					return true;
 				}
 			}
 		}
-		synchronized (defaultProcessor) {
-			defaultProcessor.processor.handleEvent(context, event);
+		if (defaultProcessor.processor != null && defaultProcessor.processor.handleEvent(context, event)) {
+			return true;
 		}
+		return false;
 	}
 
 	@Override
-	public void handleException(ProcessorContext context, Throwable t) throws ProcessException {
+	public boolean handleException(ProcessorContext context, Throwable t) throws ProcessException {
 		synchronized (warpers) {
 			for (int i = 0; i < index; i++) {
 				ProcessorWarper warper = warpers[i];
 				if (warper.processor.handleException(context, t)) {
-					return;
+					return true;
 				}
 			}
 		}
-		synchronized (defaultProcessor) {
-			defaultProcessor.processor.handleException(context, t);
+		if (defaultProcessor.processor != null && defaultProcessor.processor.handleException(context, t)) {
+			return true;
 		}
+		return false;
 	}
 
 	class ProcessorWarper {

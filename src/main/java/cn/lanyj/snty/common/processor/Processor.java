@@ -6,15 +6,17 @@ import cn.lanyj.snty.common.msg.Message;
 import cn.lanyj.snty.common.processor.ProcessorContext.State;
 import cn.lanyj.snty.common.processor.exception.ProcessException;
 
+/**
+ * used for processor manager, return true for finish pipeline, false for
+ * continue
+ * 
+ * @see ProcessorManager
+ * @see ProcessorContext
+ * @author lanyj
+ *
+ */
 public interface Processor {
 
-	/**
-	 * 
-	 * @param context
-	 * @param msg
-	 * @return <code>true></code> for process not finished
-	 * @throws ProcessException
-	 */
 	default <T extends Serializable> boolean handleMessage(ProcessorContext context, Message<T> msg)
 			throws ProcessException {
 		return false;

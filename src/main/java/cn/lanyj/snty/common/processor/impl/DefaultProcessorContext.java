@@ -10,6 +10,10 @@ public class DefaultProcessorContext implements ProcessorContext {
 	ProcessorManager manager;
 	State state = State.NONE;
 
+	public DefaultProcessorContext(ChannelHandlerContext context) {
+		this.context = context;
+	}
+
 	public DefaultProcessorContext(ChannelHandlerContext context, ProcessorManager manager) {
 		this.context = context;
 		this.manager = manager;
@@ -21,24 +25,30 @@ public class DefaultProcessorContext implements ProcessorContext {
 	}
 
 	@Override
-	public ProcessorManager processorManager() {
+	public void setProcessorManager(ProcessorManager manager) {
+		this.manager = manager;
+	}
+
+	@Override
+	public ProcessorManager getProcessorManager() {
 		return manager;
 	}
 
 	@Override
-	public void handleEvent(Object event) throws ProcessException {
-		processorManager().handleEvent(this, event);
+	public boolean handleEvent(Object event) throws ProcessException {
+		return getProcessorManager().handleEvent(this, event);
 	}
 
 	@Override
-	public void handleException(Throwable t) throws ProcessException {
-		processorManager().handleException(this, t);
+	public boolean handleException(Throwable t) throws ProcessException {
+		return getProcessorManager().handleException(this, t);
 	}
 
 	@Override
-	public void handleChannelStateChanged(State state) throws ProcessException {
-		processorManager().handleChannelStateChanged(this, this.state, state);
+	public boolean handleChannelStateChanged(State state) throws ProcessException {
+		boolean ret = getProcessorManager().handleChannelStateChanged(this, this.state, state);
 		this.state = state;
+		return ret;
 	}
 
 }

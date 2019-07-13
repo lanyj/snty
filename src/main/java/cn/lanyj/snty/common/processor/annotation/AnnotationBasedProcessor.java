@@ -31,7 +31,7 @@ public class AnnotationBasedProcessor implements Processor {
 	public <T extends Serializable> boolean handleMessage(ProcessorContext context, Message<T> msg)
 			throws ProcessException {
 		MethodProcessor processor = getMessageProcessor(msg.getClass());
-		if (processor != null) {
+		if (processor.method != null) {
 			try {
 				return (boolean) processor.method.invoke(bean, context, msg);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -44,7 +44,7 @@ public class AnnotationBasedProcessor implements Processor {
 	@Override
 	public boolean handleEvent(ProcessorContext context, Object event) throws ProcessException {
 		MethodProcessor processor = getEventProcessor(event.getClass());
-		if (processor != null) {
+		if (processor.method != null) {
 			try {
 				return (boolean) processor.method.invoke(bean, context, event);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -57,7 +57,7 @@ public class AnnotationBasedProcessor implements Processor {
 	@Override
 	public boolean handleException(ProcessorContext context, Throwable t) throws ProcessException {
 		MethodProcessor processor = getExceptionProcessor(t.getClass());
-		if (processor != null) {
+		if (processor.method != null) {
 			try {
 				return (boolean) processor.method.invoke(bean, context, t);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -101,9 +101,10 @@ public class AnnotationBasedProcessor implements Processor {
 					}
 				}
 			}
-//			if (processor == null) {
+			if (processor == null) {
+				processor = MethodProcessor.NULL_PROCESSOR;
 //				throw new NotFoundProcessorException("Processor not found for message type: " + clazz);
-//			}
+			}
 			messageProcessors.put(clazz, processor);
 		}
 		return processor;
@@ -129,9 +130,10 @@ public class AnnotationBasedProcessor implements Processor {
 					}
 				}
 			}
-//			if (processor == null) {
+			if (processor == null) {
+				processor = MethodProcessor.NULL_PROCESSOR;
 //				throw new NotFoundProcessorException("Processor not found for event type: " + clazz);
-//			}
+			}
 			eventProcessors.put(clazz, processor);
 		}
 		return processor;
@@ -157,9 +159,10 @@ public class AnnotationBasedProcessor implements Processor {
 					}
 				}
 			}
-//			if (processor == null) {
+			if (processor == null) {
+				processor = MethodProcessor.NULL_PROCESSOR;
 //				throw new NotFoundProcessorException("Processor not found for exception type: " + clazz);
-//			}
+			}
 			exceptionProcessors.put(clazz, processor);
 		}
 		return processor;
